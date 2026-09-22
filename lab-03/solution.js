@@ -133,35 +133,41 @@ async function varianteB(project, openai) {
   const frage = "Fasse die Readme der Azure REST API Specifications in fünf Sätzen zusammen.";
   console.log(`Frage: ${frage}\n`);
 
-  const response = await openai.responses.create(
+  let response = await openai.responses.create(
     { conversation: conversation.id, input: frage },
     withAgent(agent),
   );
 
   // require_approval: "always" - der Dienst fragt, bevor er nach außen geht.
-  const freigaben = [];
-  for (const item of response.output) {
-    if (item.type === "mcp_approval_request") {
-      console.log(`Freigabe angefragt: ${item.server_label} -> ${item.name}`);
-      freigaben.push({
-        type: "mcp_approval_response",
-        approval_request_id: item.id,
-        approve: true,
+  // Wichtig: ein Server nutzt oft mehrere Werkzeuge nacheinander, und jedes
+  // fragt erneut. Deshalb so lange freigeben, bis keine Anfrage mehr kommt.
+  const MAX_RUNDEN = 6;
+  for (let runde = 1; runde <= MAX_RUNDEN; runde++) {
+    const freigaben = response.output
+      .filter((item) => item.type === "mcp_approval_request")
+      .map((item) => {
+        console.log(`Runde ${runde}: Freigabe angefragt fuer ${item.server_label} -> ${item.name}`);
+        return {
+          type: "mcp_approval_response",
+          approval_request_id: item.id,
+          approve: true,
+        };
       });
-    }
-  }
 
-  if (freigaben.length === 0) {
-    console.log("Keine Freigabe nötig gewesen. Antwort:");
-    console.log(response.output_text);
-  } else {
-    console.log(`\n${freigaben.length} Freigabe(n) erteilt, zweiter Lauf...\n`);
-    const finale = await openai.responses.create(
+    if (freigaben.length === 0) break;
+
+    response = await openai.responses.create(
       { input: freigaben, previous_response_id: response.id },
       withAgent(agent),
     );
-    console.log("Antwort:");
-    console.log(finale.output_text);
+  }
+
+  console.log("\nAntwort:");
+  if (response.output_text) {
+    console.log(response.output_text);
+  } else {
+    console.log("(kein Text) - der Lauf endete mit diesen Items:");
+    console.log(response.output.map((item) => item.type).join(", "));
   }
 
   await openai.conversations.delete(conversation.id);

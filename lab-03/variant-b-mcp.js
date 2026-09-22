@@ -54,7 +54,7 @@ run(async () => {
   // TODO 2: Startet den Lauf in einer Conversation.
   //
   //   const conversation = await openai.conversations.create();
-  //   const response = await openai.responses.create(
+  //   let response = await openai.responses.create(   // let, nicht const - siehe TODO 3
   //     { conversation: conversation.id, input: FRAGE },
   //     withAgent(agent),
   //   );
@@ -62,25 +62,24 @@ run(async () => {
   // TODO 3: Wegen require_approval: "always" kommt zuerst eine Freigabe-Anfrage
   //         zurück, noch keine Antwort. Sammelt sie ein und beantwortet sie.
   //
-  //   const freigaben = [];
-  //   for (const item of response.output) {
-  //     if (item.type === "mcp_approval_request") {
-  //       console.log(`Freigabe angefragt: ${item.server_label} -> ${item.name}`);
-  //       freigaben.push({
-  //         type: "mcp_approval_response",
-  //         approval_request_id: item.id,
-  //         approve: true,
-  //       });
-  //     }
-  //   }
+  //   const freigaben = response.output
+  //     .filter((item) => item.type === "mcp_approval_request")
+  //     .map((item) => ({
+  //       type: "mcp_approval_response",
+  //       approval_request_id: item.id,
+  //       approve: true,
+  //     }));
   //
-  // TODO 4: Zweiter Lauf mit den Freigaben - jetzt darf der Dienst zugreifen.
-  //
-  //   const finale = await openai.responses.create(
+  //   response = await openai.responses.create(
   //     { input: freigaben, previous_response_id: response.id },
   //     withAgent(agent),
   //   );
-  //   console.log(finale.output_text);
+  //
+  // TODO 4: Achtung, eine Runde reicht nicht. Der Server nutzt mehrere Werkzeuge
+  //         nacheinander, und jedes fragt erneut - bei dieser Frage sind es drei.
+  //         Wiederholt TODO 3 in einer Schleife, bis keine Anfrage mehr kommt
+  //         (mit Obergrenze, damit es nicht ewig läuft), und gebt dann
+  //         response.output_text aus.
   //
   // TODO 5 (Diskussion, kein Code): Stellt require_approval auf "never" und
   //         überlegt, was das in eurem Umfeld bedeutet - wer entscheidet dann,

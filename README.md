@@ -104,6 +104,7 @@ await openai.responses.create({ conversation: id, input: "..." }, withAgent(agen
 | 429                                        | Rate Limit / Quota                                   | kurz warten, erneut starten                              |
 | Endpoint nicht erreichbar                  | `PROJECT_ENDPOINT` unvollständig                     | muss auf `/api/projects/<projekt>` enden                 |
 | falsche Subscription                       | mehrere Subscriptions im Account                     | `az account set --subscription "<name>"`                 |
+| `az` bricht mit `PermissionError` in `~/.azure/cliextensions` ab (WSL) | `~/.azure` zeigt ins Windows-Profil, die Extension-Ordner sind aus WSL nicht lesbar | `export AZURE_EXTENSION_DIR=$HOME/.azure-cliextensions-wsl` (in die `~/.bashrc`, damit auch Node es sieht) |
 
 ## Nach dem Workshop
 

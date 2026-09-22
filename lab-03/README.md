@@ -59,6 +59,13 @@ Ihr führt hier nichts aus. Weil `require_approval: "always"` gesetzt ist, kommt
 ersten Lauf statt einer Antwort ein `mcp_approval_request` zurück; ihr schickt eine
 `mcp_approval_response` und der Dienst arbeitet weiter.
 
+**Eine Runde reicht dabei nicht.** Der Server nutzt mehrere Werkzeuge nacheinander, und
+jedes fragt einzeln nach — bei der vorgegebenen Frage sind es drei Runden
+(`fetch_azure_rest_api_docs`, `search_azure_rest_api_code`, `fetch_generic_url_content`).
+Freigeben also in einer Schleife, bis keine Anfrage mehr zurückkommt. Wer nur einmal
+freigibt, bekommt eine leere Antwort — und genau daran sieht man, wie viele Zugriffe so
+ein Lauf im Hintergrund wirklich macht.
+
 **Diskussionspunkt statt Code:** Stellt euch `require_approval: "never"` vor. Wer
 entscheidet dann, welche Daten diesen Server erreichen? Genau an dieser Stelle wird die
 Auth-Zeile aus der Vergleichstabelle konkret.
@@ -79,6 +86,8 @@ im zweiten Projekt gebraucht wird.
 
 - **`response.output_text` ist leer** — richtig so: im ersten Lauf steht dort kein Text,
   sondern in `response.output` ein `function_call` bzw. ein `mcp_approval_request`.
+  Bleibt er auch nach der Freigabe leer, fehlt die Schleife über weitere Freigaberunden
+  (Variante B).
 - **Der zweite Lauf kennt den ersten nicht** — `previous_response_id` vergessen.
 - **Kein Tool-Aufruf** — die Frage passt nicht zur Tool-Beschreibung, oder die
   Instructions sagen nicht, wann das Tool zu nutzen ist.
