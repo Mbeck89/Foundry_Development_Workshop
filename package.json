@@ -1,0 +1,28 @@
+{
+  "name": "foundry-development-workshop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Begleitrepo zum Workshop 'Entwicklung mit Microsoft Foundry' — Labs 1 bis 3",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "doctor": "node tools/doctor.js",
+    "lab1": "node lab-01/index.js",
+    "lab1:stream": "node lab-01/streaming.js",
+    "lab1:json": "node lab-01/structured.js",
+    "lab1:solution": "node lab-01/solution.js",
+    "lab2": "node lab-02/index.js",
+    "lab2:solution": "node lab-02/solution.js",
+    "lab3:a": "node lab-03/variant-a-function.js",
+    "lab3:b": "node lab-03/variant-b-mcp.js",
+    "lab3:solution": "node lab-03/solution.js",
+    "cleanup": "node tools/cleanup.js"
+  },
+  "dependencies": {
+    "@azure/ai-projects": "^2.7.0",
+    "@azure/identity": "^4.13.0",
+    "dotenv": "^17.0.0"
+  }
+}
